@@ -17,9 +17,11 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-jwt:
-  secret: d1a453dd70cba96bffc93b7448363f254efdbb73bdb1c844f95d42dc310cf634
-  expiration: 3600000
+app:
+  jwt:
+    secret: "vS6K5vH8N2zB4xR9mQ3pL1wT7yC5vH8N2zB4xR9mQ3pL1wT7yC5vH8N2z"
+    access-token-expiration: 900000 # 15 mins
+    refresh-token-expiration: 604800000 # 7 days
 
 server:
   port: 8080

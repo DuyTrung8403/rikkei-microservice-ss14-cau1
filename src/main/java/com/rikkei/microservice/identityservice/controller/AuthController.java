@@ -6,7 +6,7 @@ import com.rikkei.microservice.identityservice.dto.RegisterRequest;
 import com.rikkei.microservice.identityservice.dto.UserResponse;
 import com.rikkei.microservice.identityservice.entity.User;
 import com.rikkei.microservice.identityservice.repository.UserRepository;
-import com.rikkei.microservice.identityservice.security.JwtUtil;
+import com.rikkei.microservice.identityservice.security.JwtUtils;
 import com.rikkei.microservice.identityservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
+    private final JwtUtils jwtUtils;
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest request) {
@@ -50,7 +50,7 @@ public class AuthController {
                     .body("User not found with username: " + username);
         }
 
-        String token = jwtUtil.generateToken(user);
+        String token = jwtUtils.generateAccessToken(user);
         return ResponseEntity.ok(token);
     }
 }

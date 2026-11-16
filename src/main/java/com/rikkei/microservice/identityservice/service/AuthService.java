@@ -4,9 +4,10 @@ import com.rikkei.microservice.identityservice.dto.AuthResponse;
 import com.rikkei.microservice.identityservice.dto.LoginRequest;
 import com.rikkei.microservice.identityservice.dto.RegisterRequest;
 import com.rikkei.microservice.identityservice.dto.UserResponse;
+import com.rikkei.microservice.identityservice.entity.RefreshToken;
 import com.rikkei.microservice.identityservice.entity.User;
 import com.rikkei.microservice.identityservice.repository.UserRepository;
-import com.rikkei.microservice.identityservice.security.JwtUtil;
+import com.rikkei.microservice.identityservice.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +21,8 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
     public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -48,16 +50,17 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
 
-        // Sử dụng BadCredentialsException cho cả 2 trường hợp để không lộ thông tin bảo mật
         if (userOptional.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOptional.get().getPassword())) {
             throw new BadCredentialsException("Bad credentials");
         }
 
         User user = userOptional.get();
-        String token = jwtUtil.generateToken(user);
+        String accessToken = jwtUtils.generateAccessToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
         return AuthResponse.builder()
-                .accessToken(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
                 .tokenType("Bearer")
                 .build();
     }
